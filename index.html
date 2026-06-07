@@ -4,432 +4,763 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>BridgeForge</title>
-<link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Instrument+Serif:ital@0;1&family=Geist:wght@300;400;500&display=swap" rel="stylesheet">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/d3/7.8.5/d3.min.js"></script>
 <style>
 *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
-
 :root{
-  --bg:#fafaf8;
-  --fg:#0a0a09;
-  --fg2:#6b6b67;
-  --fg3:#b0b0ab;
-  --line:#e4e4e0;
-  --accent:#1a1a18;
-  --blue:#2563eb;
-  --blue-dim:#dbeafe;
-  --node-bg:#fff;
-  --node-border:#e4e4e0;
+  --bg:#f8f8f6;--fg:#0d0d0b;--fg2:#6b6b67;--fg3:#b5b5b0;
+  --line:#e8e8e4;--node-bg:#ffffff;--node-border:#e8e8e4;
+  --blue:#1d4ed8;--blue-bg:#eff6ff;--blue-border:#bfdbfe;
+  --green:#15803d;--green-bg:#f0fdf4;
   --serif:'Instrument Serif',Georgia,serif;
   --sans:'Geist',system-ui,sans-serif;
 }
+html{-webkit-font-smoothing:antialiased}
+body{background:var(--bg);color:var(--fg);font-family:var(--sans);font-weight:300;min-height:100vh}
 
-@media(prefers-color-scheme:dark){
-  :root{
-    --bg:#0c0c0b;
-    --fg:#f0f0ec;
-    --fg2:#9a9a94;
-    --fg3:#4a4a46;
-    --line:#222220;
-    --accent:#f0f0ec;
-    --blue:#60a5fa;
-    --blue-dim:#1e3a5f;
-    --node-bg:#141412;
-    --node-border:#282826;
-  }
-}
+.page{max-width:760px;margin:0 auto;padding:0 28px 120px}
 
-html{font-size:16px;-webkit-font-smoothing:antialiased}
-body{
-  background:var(--bg);
-  color:var(--fg);
-  font-family:var(--sans);
-  font-weight:300;
-  min-height:100vh;
-  padding:0 0 120px;
-}
+/* HEADER */
+header{padding:60px 0 44px;border-bottom:1px solid var(--line);margin-bottom:44px}
+.wordmark{font-family:var(--serif);font-size:2rem;letter-spacing:-0.02em;display:block;margin-bottom:6px}
+.tagline{font-size:0.83rem;color:var(--fg2)}
 
-/* ── LAYOUT ────────────────── */
-.wrap{max-width:720px;margin:0 auto;padding:0 24px}
-
-/* ── HEADER ────────────────── */
-header{
-  padding:72px 0 56px;
-  border-bottom:1px solid var(--line);
-  margin-bottom:56px;
-}
-.wordmark{
-  font-family:var(--serif);
-  font-size:2rem;
-  letter-spacing:-0.02em;
-  line-height:1;
-  color:var(--fg);
-  display:block;
-  margin-bottom:10px;
-}
-.tagline{
-  font-size:0.875rem;
-  color:var(--fg2);
-  letter-spacing:0.01em;
-}
-
-/* ── INPUTS ────────────────── */
-.input-row{
-  display:grid;
-  grid-template-columns:1fr auto 1fr;
-  align-items:center;
-  gap:12px;
-  margin-bottom:20px;
-}
-.input-group{display:flex;flex-direction:column;gap:6px}
-.input-label{
-  font-size:0.65rem;
-  letter-spacing:0.12em;
-  text-transform:uppercase;
-  color:var(--fg3);
-  font-weight:500;
-}
-.field{
-  background:var(--node-bg);
-  border:1px solid var(--node-border);
-  border-radius:8px;
-  padding:12px 14px;
-  font-family:var(--sans);
-  font-size:0.9375rem;
-  font-weight:400;
-  color:var(--fg);
-  outline:none;
-  width:100%;
-  transition:border-color 0.15s;
-}
-.field::placeholder{color:var(--fg3)}
+/* INPUTS */
+.input-row{display:grid;grid-template-columns:1fr 28px 1fr;align-items:center;gap:8px;margin-bottom:14px}
+.ig{display:flex;flex-direction:column;gap:5px}
+.lbl{font-size:0.6rem;letter-spacing:0.13em;text-transform:uppercase;color:var(--fg3);font-weight:500}
+.field{background:var(--node-bg);border:1px solid var(--node-border);border-radius:8px;padding:11px 14px;font-family:var(--sans);font-size:0.9rem;font-weight:400;color:var(--fg);outline:none;width:100%;transition:border-color .15s}
 .field:focus{border-color:var(--fg2)}
-.arrow-sep{
-  font-size:1.2rem;
-  color:var(--fg3);
-  text-align:center;
-  padding-top:18px;
-  user-select:none;
-}
+.field::placeholder{color:var(--fg3)}
+.arr{color:var(--fg3);text-align:center;font-size:1rem;padding-top:18px;user-select:none}
 
-/* ── ACTIONS ────────────────── */
-.action-row{
-  display:flex;
-  gap:10px;
-  align-items:center;
-  flex-wrap:wrap;
-  margin-bottom:32px;
-}
-.btn{
-  font-family:var(--sans);
-  font-size:0.875rem;
-  font-weight:400;
-  padding:10px 20px;
-  border-radius:7px;
-  border:1px solid var(--node-border);
-  background:var(--node-bg);
-  color:var(--fg);
-  cursor:pointer;
-  transition:all 0.12s;
-  letter-spacing:0.01em;
-}
-.btn:hover{border-color:var(--fg2);color:var(--fg)}
-.btn-primary{
-  background:var(--fg);
-  color:var(--bg);
-  border-color:var(--fg);
-}
-.btn-primary:hover{opacity:0.85;color:var(--bg)}
-.btn-primary:disabled{opacity:0.4;cursor:default}
-.btn-sm{
-  font-size:0.8125rem;
-  padding:7px 14px;
-}
+/* DEPTH CONTROL */
+.depth-row{display:flex;align-items:center;gap:12px;margin-bottom:18px;padding:12px 14px;background:var(--node-bg);border:1px solid var(--node-border);border-radius:8px}
+.depth-label{font-size:0.75rem;color:var(--fg2);white-space:nowrap}
+.depth-btns{display:flex;gap:4px}
+.depth-btn{width:28px;height:28px;border-radius:5px;border:1px solid var(--node-border);background:var(--bg);color:var(--fg2);cursor:pointer;font-size:0.8rem;display:flex;align-items:center;justify-content:center;transition:all .12s;font-family:var(--sans)}
+.depth-btn.active{background:var(--fg);color:var(--bg);border-color:var(--fg)}
+.depth-hint{font-size:0.73rem;color:var(--fg3);margin-left:auto}
 
-/* ── CHIPS ────────────────── */
-.chips{
-  display:flex;
-  flex-wrap:wrap;
-  gap:6px;
-  margin-bottom:48px;
-}
-.chip{
-  font-size:0.78rem;
-  padding:5px 12px;
-  border-radius:999px;
-  border:1px solid var(--line);
-  background:transparent;
-  color:var(--fg2);
-  cursor:pointer;
-  font-family:var(--sans);
-  font-weight:400;
-  transition:all 0.12s;
-}
+/* ACTIONS */
+.action-row{display:flex;gap:8px;margin-bottom:24px;flex-wrap:wrap;align-items:center}
+.btn{font-family:var(--sans);font-size:0.83rem;font-weight:400;padding:9px 18px;border-radius:7px;border:1px solid var(--node-border);background:var(--node-bg);color:var(--fg);cursor:pointer;transition:all .12s;letter-spacing:.01em}
+.btn:hover{border-color:var(--fg2)}
+.btn-primary{background:var(--fg);color:var(--bg);border-color:var(--fg)}
+.btn-primary:hover{opacity:.82}
+.btn-sm{font-size:0.76rem;padding:6px 13px}
+.view-toggle{display:flex;gap:0;border:1px solid var(--node-border);border-radius:7px;overflow:hidden;margin-left:auto}
+.vt-btn{font-family:var(--sans);font-size:0.76rem;padding:7px 13px;border:none;background:var(--node-bg);color:var(--fg2);cursor:pointer;transition:all .12s;letter-spacing:.01em}
+.vt-btn.active{background:var(--fg);color:var(--bg)}
+
+/* CHIPS */
+.chips{display:flex;flex-wrap:wrap;gap:5px;margin-bottom:40px}
+.chip{font-size:0.74rem;padding:5px 11px;border-radius:999px;border:1px solid var(--line);background:transparent;color:var(--fg3);cursor:pointer;font-family:var(--sans);transition:all .12s}
 .chip:hover{border-color:var(--fg2);color:var(--fg)}
 
-/* ── OUTPUT AREA ────────────── */
-#output{min-height:40px}
+/* OUTPUT */
+.bridge-hdr{display:flex;align-items:baseline;justify-content:space-between;margin-bottom:22px;padding-bottom:14px;border-bottom:1px solid var(--line)}
+.bridge-title{font-family:var(--serif);font-size:1.3rem;letter-spacing:-.01em}
+.bridge-meta{font-size:0.74rem;color:var(--fg3);display:flex;gap:10px}
+.badge{padding:2px 8px;border-radius:4px;font-size:0.68rem;font-weight:500;letter-spacing:.04em}
+.badge-blue{background:var(--blue-bg);color:var(--blue);border:1px solid var(--blue-border)}
+.badge-green{background:var(--green-bg);color:var(--green);border:1px solid #bbf7d0}
 
-.status-line{
-  font-size:0.8125rem;
-  color:var(--fg2);
-  padding:16px 0;
-  display:flex;
-  align-items:center;
-  gap:8px;
-}
-.dot-pulse{display:inline-flex;gap:3px}
-.dot-pulse span{
-  width:4px;height:4px;border-radius:50%;
-  background:var(--fg2);
-  animation:pulse 1.2s ease-in-out infinite;
-}
-.dot-pulse span:nth-child(2){animation-delay:0.2s}
-.dot-pulse span:nth-child(3){animation-delay:0.4s}
-@keyframes pulse{0%,80%,100%{opacity:0.2}40%{opacity:1}}
-
-/* ── BRIDGE VISUAL ────────────── */
-.bridge-header{
-  display:flex;
-  align-items:baseline;
-  justify-content:space-between;
-  margin-bottom:28px;
-  padding-bottom:16px;
-  border-bottom:1px solid var(--line);
-}
-.bridge-title{
-  font-family:var(--serif);
-  font-size:1.375rem;
-  letter-spacing:-0.01em;
-  color:var(--fg);
-}
-.bridge-meta{font-size:0.78rem;color:var(--fg3)}
-
-.path-track{
-  position:relative;
-  display:flex;
-  flex-direction:column;
-  gap:0;
-  margin-bottom:32px;
-}
-
-/* vertical connector line */
-.path-track::before{
-  content:'';
-  position:absolute;
-  left:19px;
-  top:20px;
-  bottom:20px;
-  width:1px;
-  background:var(--line);
-  z-index:0;
-}
-
-.step{
-  display:grid;
-  grid-template-columns:40px 1fr;
-  gap:0 16px;
-  align-items:start;
-  padding:14px 0;
-  position:relative;
-  z-index:1;
-  animation:stepIn 0.4s cubic-bezier(0.22,1,0.36,1) both;
-}
-
-@keyframes stepIn{
-  from{opacity:0;transform:translateX(-8px)}
-  to{opacity:1;transform:translateX(0)}
-}
-
-.step-dot{
-  width:40px;height:40px;
-  border-radius:50%;
-  border:1px solid var(--node-border);
-  background:var(--node-bg);
-  display:flex;
-  align-items:center;
-  justify-content:center;
-  font-size:0.75rem;
-  font-weight:500;
-  color:var(--fg2);
-  flex-shrink:0;
-  position:relative;
-  z-index:2;
-  transition:all 0.2s;
-}
-
-.step:first-child .step-dot{
-  background:var(--fg);
-  color:var(--bg);
-  border-color:var(--fg);
-}
-.step:last-child .step-dot{
-  background:var(--blue);
-  color:#fff;
-  border-color:var(--blue);
-}
-
+/* PATH VIEW */
+.track{position:relative;display:flex;flex-direction:column;margin-bottom:24px}
+.track::before{content:'';position:absolute;left:19px;top:22px;bottom:22px;width:1px;background:var(--line);z-index:0}
+.step{display:grid;grid-template-columns:40px 1fr;gap:0 14px;align-items:start;padding:11px 0;position:relative;z-index:1;animation:sIn .35s cubic-bezier(.22,1,.36,1) both}
+@keyframes sIn{from{opacity:0;transform:translateX(-6px)}to{opacity:1;transform:translateX(0)}}
+.dot{width:40px;height:40px;border-radius:50%;border:1px solid var(--node-border);background:var(--node-bg);display:flex;align-items:center;justify-content:center;font-size:0.7rem;font-weight:500;color:var(--fg2);flex-shrink:0;position:relative;z-index:2}
+.dot-s{background:var(--fg);color:var(--bg);border-color:var(--fg)}
+.dot-e{background:var(--blue);color:#fff;border-color:var(--blue)}
 .step-body{padding-top:9px}
-.step-concept{
-  font-family:var(--serif);
-  font-size:1.0625rem;
-  letter-spacing:-0.01em;
-  color:var(--fg);
-  margin-bottom:4px;
-  line-height:1.3;
-}
-.step-desc{
-  font-size:0.8125rem;
-  color:var(--fg2);
-  line-height:1.6;
-}
-.step-logic{
-  margin-top:6px;
-  font-size:0.78rem;
-  color:var(--fg3);
-  font-style:italic;
-}
+.concept{font-family:var(--serif);font-size:1rem;color:var(--fg);margin-bottom:3px;line-height:1.3}
+.desc{font-size:0.79rem;color:var(--fg2);line-height:1.55}
+.why{margin-top:5px;font-size:0.74rem;color:var(--fg3);font-style:italic}
+.shared-tag{display:inline-block;font-size:0.65rem;padding:1px 6px;border-radius:3px;background:var(--blue-bg);color:var(--blue);margin-left:8px;vertical-align:middle;border:1px solid var(--blue-border)}
 
-/* ── INSIGHT BLOCK ────────────── */
-.insight{
-  background:var(--node-bg);
-  border:1px solid var(--node-border);
-  border-left:3px solid var(--fg);
-  border-radius:0 8px 8px 0;
-  padding:18px 20px;
-  margin-bottom:24px;
-  animation:stepIn 0.4s 0.1s both;
-}
-.insight-label{
-  font-size:0.65rem;
-  letter-spacing:0.1em;
-  text-transform:uppercase;
-  color:var(--fg3);
-  margin-bottom:8px;
-}
-.insight-text{
-  font-family:var(--serif);
-  font-size:1rem;
-  line-height:1.65;
-  color:var(--fg);
-  font-style:italic;
-}
+/* INSIGHT */
+.insight{background:var(--node-bg);border:1px solid var(--node-border);border-left:2px solid var(--fg);border-radius:0 8px 8px 0;padding:15px 18px;margin-bottom:18px;animation:sIn .35s .1s both}
+.mini-label{font-size:0.6rem;letter-spacing:.1em;text-transform:uppercase;color:var(--fg3);margin-bottom:7px}
+.insight-text{font-family:var(--serif);font-size:.96rem;line-height:1.65;font-style:italic}
 
-/* ── DEEPDIVE BLOCK ────────────── */
-.deepdive{
-  background:var(--node-bg);
-  border:1px solid var(--node-border);
-  border-radius:8px;
-  padding:18px 20px;
-  margin-bottom:24px;
-  animation:stepIn 0.4s 0.15s both;
-}
-.deepdive-label{
-  font-size:0.65rem;
-  letter-spacing:0.1em;
-  text-transform:uppercase;
-  color:var(--fg3);
-  margin-bottom:10px;
-}
-.deepdive-tags{display:flex;flex-wrap:wrap;gap:8px;margin-bottom:14px}
-.tag{
-  font-size:0.78rem;
-  padding:4px 10px;
-  border-radius:5px;
-  background:var(--blue-dim);
-  color:var(--blue);
-  cursor:pointer;
-  font-family:var(--sans);
-  border:none;
-  transition:opacity 0.12s;
-}
-.tag:hover{opacity:0.75}
-.deepdive-further{
-  font-size:0.8125rem;
-  color:var(--fg2);
-  line-height:1.6;
-}
+/* RELATED */
+.related{background:var(--node-bg);border:1px solid var(--node-border);border-radius:8px;padding:15px 18px;margin-bottom:18px;animation:sIn .35s .15s both}
+.tags{display:flex;flex-wrap:wrap;gap:6px;margin-top:8px}
+.tag{font-size:0.74rem;padding:4px 10px;border-radius:5px;background:var(--blue-bg);color:var(--blue);cursor:pointer;font-family:var(--sans);border:none;transition:opacity .12s}
+.tag:hover{opacity:.7}
 
-/* ── HISTORY ────────────────── */
-.history{margin-top:56px;padding-top:24px;border-top:1px solid var(--line)}
-.history-label{font-size:0.65rem;letter-spacing:0.12em;text-transform:uppercase;color:var(--fg3);margin-bottom:10px}
-.history-list{display:flex;flex-wrap:wrap;gap:6px}
+/* SHARE ROW */
+.share-row{display:flex;gap:8px;padding-top:4px;animation:sIn .3s both}
 
-/* ── SHARE ROW ────────────────── */
-.share-row{
-  display:flex;gap:8px;align-items:center;
-  padding-top:8px;
-  animation:stepIn 0.3s both;
-}
+/* GRAPH VIEW */
+#graph-wrap{width:100%;height:500px;background:var(--node-bg);border:1px solid var(--node-border);border-radius:12px;overflow:hidden;position:relative;animation:sIn .4s both}
+#graph-wrap svg{width:100%;height:100%}
+.graph-hint{position:absolute;bottom:12px;left:50%;transform:translateX(-50%);font-size:0.72rem;color:var(--fg3);background:var(--node-bg);padding:4px 10px;border-radius:999px;border:1px solid var(--line);pointer-events:none}
+.node-label{font-family:'Geist',system-ui,sans-serif;font-size:11px;fill:var(--fg);pointer-events:none;font-weight:400}
 
-/* ── ERROR ────────────────── */
-.error-block{
-  border:1px solid var(--node-border);
-  border-left:3px solid #dc2626;
-  border-radius:0 8px 8px 0;
-  padding:16px 18px;
-  font-size:0.875rem;
-  color:var(--fg2);
-  line-height:1.6;
-}
+/* NO PATH */
+.no-path{border:1px solid var(--node-border);border-left:2px solid var(--fg3);border-radius:0 8px 8px 0;padding:15px 18px;font-size:0.85rem;color:var(--fg2);line-height:1.65}
+.no-path strong{font-weight:500;color:var(--fg)}
+
+/* LOADING */
+.loading{font-size:0.8rem;color:var(--fg2);display:flex;align-items:center;gap:8px;padding:16px 0}
+.dots span{width:4px;height:4px;border-radius:50%;background:var(--fg2);display:inline-block;animation:p 1.2s ease-in-out infinite}
+.dots span:nth-child(2){animation-delay:.2s}
+.dots span:nth-child(3){animation-delay:.4s}
+@keyframes p{0%,80%,100%{opacity:.2}40%{opacity:1}}
+
+/* HISTORY */
+.history{margin-top:48px;padding-top:20px;border-top:1px solid var(--line)}
+.history-chips{display:flex;flex-wrap:wrap;gap:5px;margin-top:8px}
 
 @media(max-width:520px){
-  .input-row{grid-template-columns:1fr}
-  .arrow-sep{display:none}
-  header{padding:40px 0 36px}
+  .input-row{grid-template-columns:1fr}.arr{display:none}
+  header{padding:36px 0 28px}
+  #graph-wrap{height:360px}
 }
 </style>
 </head>
 <body>
-<div class="wrap">
-
+<div class="page">
 <header>
   <span class="wordmark">BridgeForge</span>
-  <p class="tagline">Trace the path between any two ideas</p>
+  <p class="tagline">Discover hidden paths between any two ideas</p>
 </header>
 
 <div class="input-row">
-  <div class="input-group">
-    <span class="input-label">From</span>
-    <input class="field" id="start" placeholder="e.g. Music" autocomplete="off">
+  <div class="ig"><span class="lbl">From</span><input class="field" id="start" placeholder="e.g. Music" autocomplete="off"></div>
+  <div class="arr">→</div>
+  <div class="ig"><span class="lbl">To</span><input class="field" id="end" placeholder="e.g. Mathematics" autocomplete="off"></div>
+</div>
+
+<div class="depth-row">
+  <span class="depth-label">Bridge depth</span>
+  <div class="depth-btns">
+    <button class="depth-btn" data-d="3" onclick="setDepth(3)">3</button>
+    <button class="depth-btn active" data-d="5" onclick="setDepth(5)">5</button>
+    <button class="depth-btn" data-d="7" onclick="setDepth(7)">7</button>
+    <button class="depth-btn" data-d="9" onclick="setDepth(9)">9</button>
   </div>
-  <div class="arrow-sep">→</div>
-  <div class="input-group">
-    <span class="input-label">To</span>
-    <input class="field" id="end" placeholder="e.g. Mathematics" autocomplete="off">
-  </div>
+  <span class="depth-hint" id="depth-hint">Balanced path</span>
 </div>
 
 <div class="action-row">
   <button class="btn btn-primary" id="build-btn" onclick="buildBridge()">Build bridge</button>
   <button class="btn" onclick="surpriseMe()">Surprise me</button>
+  <div class="view-toggle" id="view-toggle" style="display:none">
+    <button class="vt-btn active" id="vt-path" onclick="showView('path')">Path</button>
+    <button class="vt-btn" id="vt-graph" onclick="showView('graph')">Graph</button>
+  </div>
 </div>
 
-<div class="chips" id="chips">
-  <button class="chip" onclick="quickBuild('Jazz','Quantum physics')">Jazz → Quantum physics</button>
-  <button class="chip" onclick="quickBuild('Bread','Democracy')">Bread → Democracy</button>
-  <button class="chip" onclick="quickBuild('Sleep','Creativity')">Sleep → Creativity</button>
-  <button class="chip" onclick="quickBuild('Fire','Language')">Fire → Language</button>
-  <button class="chip" onclick="quickBuild('Chess','Warfare')">Chess → Warfare</button>
-  <button class="chip" onclick="quickBuild('Grief','Mathematics')">Grief → Mathematics</button>
-</div>
-
+<div class="chips" id="chips"></div>
 <div id="output"></div>
 <div id="history"></div>
-
 </div>
 
 <script>
-const SURPRISES = [
-  ['Jazz','Quantum physics'],['Bread','Democracy'],['Sleep','Creativity'],
-  ['Fire','Language'],['Chess','Warfare'],['Grief','Mathematics'],
-  ['Ocean','Memory'],['Architecture','Music'],['Money','Trust'],
-  ['Bacteria','Internet'],['Running','Meditation'],['Maps','Power'],
-  ['Childhood','War'],['Gravity','Love'],['Dreams','Economics'],
-  ['Language','DNA'],['Shadows','Identity'],['Cooking','Chemistry'],
+// ═══════════════════════════════════════════════
+// KNOWLEDGE GRAPH
+// Each node: id, label, description, tags[]
+// Each edge: [a, b, bridgeReason]
+// ═══════════════════════════════════════════════
+
+const NODES = {
+  // Sciences
+  physics:      {label:"Physics",      desc:"The study of matter, energy, and fundamental forces.",       tags:["science","formal","natural"]},
+  chemistry:    {label:"Chemistry",    desc:"How atoms bond and react to form new substances.",            tags:["science","natural","material"]},
+  biology:      {label:"Biology",      desc:"The study of living systems and their mechanisms.",           tags:["science","natural","life"]},
+  mathematics:  {label:"Mathematics",  desc:"Abstract structures defined by axioms and logic.",            tags:["formal","abstract","structure"]},
+  statistics:   {label:"Statistics",   desc:"Extracting signal from noisy, uncertain data.",               tags:["formal","data","uncertainty"]},
+  neuroscience: {label:"Neuroscience", desc:"How brains encode, process, and act on information.",         tags:["science","life","mind"]},
+  ecology:      {label:"Ecology",      desc:"How organisms interact with each other and their environment.",tags:["science","natural","systems"]},
+  geology:      {label:"Geology",      desc:"Earth's history written in rock and mineral layers.",         tags:["science","natural","time"]},
+  astronomy:    {label:"Astronomy",    desc:"Observing the universe beyond Earth's atmosphere.",           tags:["science","natural","scale"]},
+  genetics:     {label:"Genetics",     desc:"How traits encode, inherit, and express across generations.", tags:["science","life","information"]},
+
+  // Technology
+  computing:    {label:"Computing",    desc:"Automating information processing through logic gates.",      tags:["technology","formal","information"]},
+  internet:     {label:"Internet",     desc:"A decentralised mesh of connected machines sharing data.",    tags:["technology","network","communication"]},
+  cryptography: {label:"Cryptography", desc:"Hiding meaning inside mathematical complexity.",              tags:["technology","formal","security"]},
+  ai:           {label:"AI",           desc:"Systems that learn patterns and make predictions.",            tags:["technology","formal","mind"]},
+  engineering:  {label:"Engineering",  desc:"Bending physics to human will through design.",               tags:["technology","applied","structure"]},
+  architecture: {label:"Architecture", desc:"Space arranged to shape how people feel and move.",           tags:["technology","art","structure","space"]},
+
+  // Arts & Humanities
+  music:        {label:"Music",        desc:"Sound organised into pattern, rhythm, and emotion.",          tags:["art","time","pattern","emotion"]},
+  language:     {label:"Language",     desc:"Shared symbols that let minds touch across distance.",        tags:["humanities","communication","symbol"]},
+  literature:   {label:"Literature",   desc:"Stories that compress and transmit human experience.",        tags:["art","humanities","narrative","emotion"]},
+  philosophy:   {label:"Philosophy",   desc:"Questioning the foundations of knowledge and existence.",     tags:["humanities","formal","abstract"]},
+  art:          {label:"Art",          desc:"Making the invisible visible through form and medium.",        tags:["art","emotion","symbol","perception"]},
+  film:         {label:"Film",         desc:"Time-based art that manipulates perception and empathy.",      tags:["art","time","narrative","emotion"]},
+  architecture: {label:"Architecture", desc:"Space arranged to shape how people feel and move.",           tags:["art","structure","space","applied"]},
+  poetry:       {label:"Poetry",       desc:"Language compressed until it detonates meaning.",             tags:["art","language","symbol","emotion"]},
+
+  // Social & Cultural
+  economics:    {label:"Economics",    desc:"How agents make decisions under scarcity and incentive.",     tags:["social","formal","systems","behaviour"]},
+  psychology:   {label:"Psychology",   desc:"Mapping the patterns beneath conscious behaviour.",           tags:["social","science","mind","behaviour"]},
+  sociology:    {label:"Sociology",    desc:"How groups form, evolve, and constrain individuals.",         tags:["social","systems","culture"]},
+  politics:     {label:"Politics",     desc:"The negotiation of power between competing interests.",       tags:["social","systems","power"]},
+  history:      {label:"History",      desc:"The record of causes and consequences through time.",         tags:["humanities","time","narrative","culture"]},
+  anthropology: {label:"Anthropology", desc:"Understanding humans through their cultures and artefacts.",  tags:["social","humanities","culture"]},
+  law:          {label:"Law",          desc:"Codified rules that formalise social contracts.",             tags:["social","formal","power","systems"]},
+  religion:     {label:"Religion",     desc:"Systems of meaning built around the sacred and transcendent.",tags:["humanities","culture","symbol","community"]},
+
+  // Abstract Concepts
+  time:         {label:"Time",         desc:"The arrow along which cause precedes effect.",                tags:["abstract","physics","philosophy"]},
+  memory:       {label:"Memory",       desc:"The brain's lossy, reconstructive record of the past.",      tags:["abstract","mind","biology","time"]},
+  information:  {label:"Information",  desc:"Difference that makes a difference — Shannon's insight.",     tags:["abstract","formal","communication"]},
+  complexity:   {label:"Complexity",   desc:"Order emerging from simple rules at scale.",                  tags:["abstract","systems","science"]},
+  entropy:      {label:"Entropy",      desc:"The universe's stubborn drift toward disorder.",              tags:["abstract","physics","time"]},
+  evolution:    {label:"Evolution",    desc:"Descent with modification selected by environment.",          tags:["abstract","biology","time","systems"]},
+  network:      {label:"Network",      desc:"Value and behaviour emerging from nodes and connections.",    tags:["abstract","systems","structure"]},
+  symmetry:     {label:"Symmetry",     desc:"Invariance under transformation — beauty's skeleton.",        tags:["abstract","mathematics","art","physics"]},
+  pattern:      {label:"Pattern",      desc:"Recurrence that carries predictive and aesthetic weight.",    tags:["abstract","formal","art","science"]},
+  recursion:    {label:"Recursion",    desc:"A process that calls itself — structure containing itself.",  tags:["abstract","formal","computing","philosophy"]},
+
+  // Human Experiences
+  sleep:        {label:"Sleep",        desc:"Consciousness cycling between states to consolidate learning.",tags:["life","mind","biology","time"]},
+  dreams:       {label:"Dreams",       desc:"The brain running unsupervised simulations.",                 tags:["mind","abstract","narrative","biology"]},
+  grief:        {label:"Grief",        desc:"The cost of love — attachment interrupted by loss.",          tags:["emotion","mind","social","time"]},
+  play:         {label:"Play",         desc:"Voluntary engagement in rule-bound uncertainty.",             tags:["behaviour","social","learning","emotion"]},
+  creativity:   {label:"Creativity",   desc:"Combining existing ideas in configurations not seen before.", tags:["mind","art","behaviour","abstract"]},
+  consciousness:{label:"Consciousness",desc:"The felt quality of experience — the hard problem.",         tags:["mind","philosophy","abstract","science"]},
+  love:         {label:"Love",         desc:"Sustained attention and care directed at another.",           tags:["emotion","social","biology","abstract"]},
+  fear:         {label:"Fear",         desc:"The mind's threat-detection system running hot.",             tags:["emotion","biology","mind","behaviour"]},
+  trust:        {label:"Trust",        desc:"Betting your vulnerability on another's predictability.",     tags:["social","emotion","behaviour","abstract"]},
+  power:        {label:"Power",        desc:"The capacity to shape outcomes and other agents' behaviour.", tags:["social","abstract","politics","behaviour"]},
+  ritual:       {label:"Ritual",       desc:"Repeated symbolic action that binds identity and community.", tags:["culture","religion","social","symbol"]},
+  money:        {label:"Money",        desc:"Shared fiction that stores and transfers value.",             tags:["social","abstract","economics","trust"]},
+  war:          {label:"War",          desc:"Organised violence deployed in pursuit of political ends.",   tags:["social","power","history","behaviour"]},
+  trade:        {label:"Trade",        desc:"Voluntary exchange that expands what each party can access.", tags:["social","economics","network","trust"]},
+  fire:         {label:"Fire",         desc:"Controlled oxidation that gave humans energy and community.", tags:["natural","history","culture","chemistry"]},
+  bread:        {label:"Bread",        desc:"Fermentation and heat transforming grain into civilisation.", tags:["culture","chemistry","history","natural"]},
+  maps:         {label:"Maps",         desc:"Abstractions of territory that encode and enforce power.",    tags:["abstract","symbol","power","history"]},
+  games:        {label:"Games",        desc:"Formal systems that generate emergent, meaningful play.",     tags:["formal","behaviour","social","play"]},
+  meditation:   {label:"Meditation",   desc:"Deliberate attention training that reshapes neural circuits.",tags:["mind","behaviour","life","time"]},
+  running:      {label:"Running",      desc:"Rhythmic locomotion that merges body and mind.",              tags:["life","biology","mind","time"]},
+  cooking:      {label:"Cooking",      desc:"Controlled chemistry that transforms and preserves nutrition.",tags:["chemistry","culture","art","natural"]},
+  chess:        {label:"Chess",        desc:"Perfect-information strategy compressed onto 64 squares.",    tags:["formal","games","strategy","pattern"]},
+  dance:        {label:"Dance",        desc:"The body writing in space and time.",                         tags:["art","time","body","pattern","music"]},
+  jazz:         {label:"Jazz",         desc:"Improvisation within structure — freedom inside constraint.", tags:["music","art","pattern","creativity"]},
+  democracy:    {label:"Democracy",    desc:"Distributed authority over collective decision-making.",      tags:["politics","social","systems","trust"]},
+  medicine:     {label:"Medicine",     desc:"Applied biology fighting entropy in living systems.",         tags:["science","biology","applied","life"]},
+  gravity:      {label:"Gravity",      desc:"Mass curving spacetime, pulling everything toward everything.",tags:["physics","abstract","natural","scale"]},
+  light:        {label:"Light",        desc:"Electromagnetic radiation — both wave and particle.",         tags:["physics","natural","perception","abstract"]},
+  dna:          {label:"DNA",          desc:"Four chemical letters encoding all known life.",              tags:["biology","information","chemistry","life"]},
+  bacteria:     {label:"Bacteria",     desc:"Single-celled life that predates and underlies all biology.", tags:["biology","natural","network","life"]},
+  childhood:    {label:"Childhood",    desc:"The period of maximal plasticity and world-model building.",  tags:["life","psychology","social","time"]},
+  shadow:       {label:"Shadow",       desc:"Absence of light that defines the shape of things.",          tags:["abstract","perception","art","philosophy"]},
+  ocean:        {label:"Ocean",        desc:"Earth's vast liquid commons — cradle of all life.",           tags:["natural","life","scale","ecology"]},
+  space:        {label:"Space",        desc:"The mostly-empty medium in which matter and time exist.",     tags:["natural","abstract","scale","physics"]},
+};
+
+// EDGES: [nodeA, nodeB, reason A→B, reason B→A]
+const EDGES = [
+  ["music","mathematics","Rhythm, harmony, and melody are ratio, wave, and pattern made audible.","Mathematics is pattern seeking form — music gives it a body."],
+  ["music","physics","Sound is longitudinal wave — frequency is pitch made physical.","Physics finds in sound a perfect model of wave mechanics."],
+  ["music","emotion","Melody and rhythm bypass cognition and speak directly to affect.","Emotion given form becomes music."],
+  ["music","language","Both organise sound symbols into meaning through grammar and syntax.","Language sung becomes music — the boundary dissolves."],
+  ["music","time","Music is the art form that exists only in time.","Time gains texture and shape through rhythm and pulse."],
+  ["music","pattern","Musical structure is pattern recognition trained to produce pleasure.","Pattern made audible becomes music."],
+  ["music","jazz","Jazz is the experimental laboratory where music tests its own limits.","Jazz crystallises music's tension between structure and freedom."],
+  ["music","dance","Dance is music made visible in the body.","Dance gives music a physical dimension."],
+  ["mathematics","physics","Physics is mathematics applied to matter — the unreasonable effectiveness.","Mathematics grew partly from the need to describe motion and force."],
+  ["mathematics","computing","Computation is applied formal logic — Turing machines are mathematical objects.","Computing made mathematics physical and executable."],
+  ["mathematics","philosophy","Mathematics raises philosophy's hardest question: why does abstract truth apply to reality?","Philosophy tries to explain what mathematics is — and mostly fails."],
+  ["mathematics","cryptography","Cryptography is applied number theory — hard problems that protect secrets.","Cryptography stress-tests mathematical conjectures in the real world."],
+  ["mathematics","pattern","Mathematics is the science of pattern — structure abstracted from instance.","Pattern made rigorous becomes mathematics."],
+  ["mathematics","symmetry","Group theory is the mathematics of symmetry — both fields share the same skeleton.","Symmetry is the physical intuition behind abstract algebra."],
+  ["mathematics","statistics","Statistics is the mathematics of uncertainty and inference.","Mathematics gives statistics its rigorous foundation."],
+  ["mathematics","economics","Economics encodes human decision-making in mathematical models.","Mathematics finds in markets a messy but rich laboratory."],
+  ["physics","chemistry","Chemistry is physics at the scale of electrons and bonds.","Physics underpins chemistry — valence follows quantum mechanics."],
+  ["physics","astronomy","Astronomy is physics at cosmological scale — same laws, vast distances.","Astronomy motivated Newtonian physics and tests general relativity."],
+  ["physics","entropy","Entropy is thermodynamics' gift — time's arrow from physics.","Entropy constrains all physical processes."],
+  ["physics","gravity","Gravity is the curvature of spacetime by mass — Einstein's deepest insight.","Gravity shapes all large-scale structures in physics."],
+  ["physics","symmetry","Conservation laws follow from symmetry — Noether's theorem.","Symmetry explains why physical quantities are conserved."],
+  ["physics","light","Light is the messenger of physics — carried by photons, bent by gravity.","Light probes physical reality at its most fundamental."],
+  ["chemistry","biology","Life is chemistry running inside a membrane — metabolism is reaction networks.","Biology is chemistry with memory, reproduction, and evolution."],
+  ["chemistry","cooking","Cooking is controlled chemistry that transforms molecular structure into flavour.","Chemistry explains every transformation in the kitchen."],
+  ["chemistry","medicine","Pharmacology is chemistry targeted at biological mechanisms.","Medicine applies chemistry to maintain and restore biological order."],
+  ["chemistry","dna","DNA is a chemical alphabet encoding biological information.","Chemistry describes the bonds that make DNA readable and writable."],
+  ["chemistry","fire","Fire is rapid oxidation — chemistry at human scale and timescale.","Chemistry explains the first technology humans ever controlled."],
+  ["biology","evolution","Evolution is the algorithm that runs on biological variation.","Biology is evolution's ongoing experiment."],
+  ["biology","neuroscience","Neuroscience is biology applied to the brain's physical substrate.","Biology provides the cellular and molecular tools for neuroscience."],
+  ["biology","genetics","Genetics is the information layer of biology — the code beneath the cell.","Biology is genetics expressed across developmental time."],
+  ["biology","ecology","Ecology is biology scaled to networks of species and environments.","Biology provides the units; ecology studies their interactions."],
+  ["biology","bacteria","Bacteria are biology's simplest and oldest form — the root of the tree of life.","Bacteria underpin all of biology — mitochondria were once bacteria."],
+  ["biology","dna","DNA is the physical substrate on which biological information is stored.","Biology is ultimately the execution of a DNA programme."],
+  ["biology","medicine","Medicine is applied biology fighting disease and entropy.","Biology is the science medicine applies."],
+  ["biology","sleep","Sleep is biology's maintenance window — cellular repair and memory consolidation.","Sleep is a biological necessity shaped by evolutionary pressures."],
+  ["computing","internet","The internet is computing extended across physical space via protocols.","Computing provides the machines and logic the internet runs on."],
+  ["computing","ai","AI is pattern recognition implemented in computation at scale.","Computing is the substrate AI runs on."],
+  ["computing","cryptography","Cryptography secures every layer of computing from chips to networks.","Computing enabled cryptography to leave pure mathematics and become practical."],
+  ["computing","information","Computing is information processing formalised into hardware.","Information theory defined what computing must do."],
+  ["computing","language","Programming languages are formal languages that instruct machines.","Language inspired the design of syntax, grammar, and semantics in code."],
+  ["computing","genetics","DNA is information storage; computing models it; CRISPR edits it.","Genetics is computation running in wet matter."],
+  ["internet","network","The internet is the largest network humans have ever built.","Network science explains the internet's topology and failure modes."],
+  ["internet","bacteria","Both are decentralised networks with no single point of failure.","Bacteria pioneered horizontal information transfer — the internet rediscovered it."],
+  ["internet","economics","The internet created new markets, destroyed old ones, and rewrote value.","Economics describes how the internet's abundance changes scarcity."],
+  ["internet","democracy","The internet distributes both information and the power to publish it.","Democracy relies on informed citizens — the internet changes what that means."],
+  ["language","literature","Literature is language at its most compressed and intentional.","Language is the medium literature works in."],
+  ["language","philosophy","Philosophy happens in language — and is partly constrained by it.","Language is philosophy's primary object and its prison."],
+  ["language","dna","Both are symbol systems encoding information in linear sequences.","DNA is the original language — written in nucleotides."],
+  ["language","poetry","Poetry is language under maximum pressure.","Language in extremis becomes poetry."],
+  ["language","music","Both organise sequences of symbols into meaning — grammar maps to harmony.","Music is language freed from denotation."],
+  ["language","anthropology","Language carries culture across generations — it is culture's skeleton.","Anthropology uses language as both tool and object of study."],
+  ["language","consciousness","The question of whether thought requires language is still open.","Consciousness may be partly made of language — or preceded by it."],
+  ["philosophy","religion","Both address ultimate questions of existence, value, and meaning.","Philosophy analyses the structure of religious claims."],
+  ["philosophy","mathematics","Both seek necessary truths independent of physical contingency.","Mathematics is philosophy with better notation."],
+  ["philosophy","psychology","Philosophy of mind became empirical psychology when it got lab access.","Psychology probes the claims philosophy makes about mind."],
+  ["philosophy","consciousness","Philosophy of mind is the project of explaining how matter produces experience.","Consciousness is philosophy's hardest unresolved problem."],
+  ["philosophy","ethics","Ethics is the branch of philosophy that asks how we should act.","Ethics requires philosophical foundations about value and reason."],
+  ["economics","politics","Politics allocates power; economics allocates resources — they are the same game.","Economics provides the material constraints within which politics operates."],
+  ["economics","psychology","Behavioural economics showed that psychology breaks rational-agent models.","Psychology explains why economic agents deviate from their own models."],
+  ["economics","money","Money is economics made portable, divisible, and storable.","Economics is the science that explains what money does and why."],
+  ["economics","games","Game theory is the formal mathematics of strategic economic interaction.","Games model economic competition with perfect clarity."],
+  ["economics","evolution","Both describe systems where variation competes under selection pressure.","Evolution is economics running at biological timescale."],
+  ["economics","trade","Trade is economics in action — voluntary exchange generating surplus.","Economics explains why trade creates value even when one party has every advantage."],
+  ["psychology","neuroscience","Neuroscience grounds psychological theories in physical brain mechanisms.","Psychology maps the territory neuroscience then excavates."],
+  ["psychology","creativity","Creativity is the psychological process of recombining existing mental structures.","Psychology explains the mechanisms behind creative cognition."],
+  ["psychology","fear","Fear is psychology's most studied affect — the root of much human behaviour.","Psychology maps the shapes fear takes across individuals and cultures."],
+  ["psychology","memory","Memory is psychology's central mechanism — everything we are is stored.","Psychology studies how memory shapes identity and behaviour."],
+  ["psychology","love","Love is psychology studying its own deepest motivation.","Psychology explains attachment, longing, and the need for connection."],
+  ["psychology","play","Play is the psychological laboratory where skills and social rules are tested.","Psychology reveals play's role in development, creativity, and wellbeing."],
+  ["psychology","trust","Trust is psychology meeting sociology — prediction of others' behaviour.","Psychology studies how trust forms, breaks, and is repaired."],
+  ["politics","history","History is politics extended through time — causes and consequences of power.","Politics repeats history or learns from it."],
+  ["politics","war","War is politics by other means — Clausewitz condensed it perfectly.","Politics is the attempt to achieve through words what war does through force."],
+  ["politics","law","Law codifies political settlements — the frozen residue of past power.","Politics is the contest over what law should say."],
+  ["politics","power","Politics is the study and practice of power in collective decision-making.","Power flowing through institutions becomes politics."],
+  ["politics","democracy","Democracy is a particular answer to the question of how to organise political power.","Politics in a democracy is constrained to non-violent competition."],
+  ["history","time","History is the human record of time's passage and its effects.","Time is history's axis — without it there is only a heap of events."],
+  ["history","memory","History is collective memory — the same reconstruction, same distortion.","Memory is personal history — both selective, both revisable."],
+  ["history","evolution","History is cultural evolution — ideas competing in the same arena as genes.","Evolution happens over historical timescales — often we see both at once."],
+  ["history","maps","Maps encode historical power — whoever draws the border controls the story.","History is partly the story of who controlled the maps."],
+  ["art","creativity","Art is creativity's primary output — its most visible and lasting form.","Creativity needs a medium; art is what happens when it finds one."],
+  ["art","emotion","Art's function is to make private emotional experience shareable.","Emotion made external and repeatable becomes art."],
+  ["art","perception","Art exploits and illuminates how the brain constructs reality.","Perception is the sense art most directly manipulates."],
+  ["art","architecture","Architecture is the art you cannot avoid — it surrounds you by default.","Art and architecture share spatial, formal, and cultural roots."],
+  ["art","symmetry","Aesthetic pleasure is partly explained by symmetry detection in the brain.","Symmetry in art creates beauty, tension, and resolution."],
+  ["art","shadow","Shadow in visual art creates depth, mystery, and psychological resonance.","Shadow is the negative space that gives form to light."],
+  ["creativity","consciousness","Creativity requires the self-awareness to recombine and evaluate new configurations.","Consciousness is what makes creativity possible — and purposeful."],
+  ["creativity","play","Play is the natural mode of creativity — exploration without fixed outcome.","Creativity emerges from play when play is directed at a problem."],
+  ["creativity","dreams","Dreams are the brain's creativity engine running without editorial oversight.","Creativity in waking life borrows from the dream's unconstrained association."],
+  ["creativity","jazz","Jazz is structured creativity — improvisation as real-time composition.","Creativity in music finds its purest form in jazz improvisation."],
+  ["consciousness","neuroscience","Neuroscience is the empirical attack on the hard problem of consciousness.","Consciousness is what neuroscience ultimately needs to explain."],
+  ["consciousness","philosophy","Philosophy set the terms for the consciousness debate; science supplies the data.","Consciousness is the problem that makes philosophy necessary."],
+  ["consciousness","sleep","Sleep cycles between different states of consciousness — absence reveals presence.","Consciousness defined by what it loses and recovers during sleep."],
+  ["consciousness","dreams","Dreams are consciousness running with sensory input removed.","Consciousness in dreams shows how much it constructs rather than reflects."],
+  ["consciousness","meditation","Meditation is the deliberate study of consciousness from the inside.","Consciousness examined directly — without instruments — is meditation."],
+  ["time","memory","Memory is the mind's subjective experience of time.","Time only feels meaningful because we can remember it."],
+  ["time","entropy","Entropy is the physical reason time has a direction.","Time flows because entropy increases — the arrow has a cause."],
+  ["time","evolution","Evolution is the process by which time reshapes biology.","Time is the medium evolution works in."],
+  ["time","sleep","Sleep marks time's passage — circadian rhythm is biology's clock.","Time's biological signal is the sleep-wake cycle."],
+  ["information","genetics","DNA is biological information — the genome is a programme.","Genetics is information science applied to molecular biology."],
+  ["information","computing","Computing is formalised information processing.","Information theory defined what computation must minimally do."],
+  ["information","entropy","Information and entropy are mathematically identical — Shannon showed this.","Entropy in thermodynamics and in information theory share the same equation."],
+  ["information","language","Language is the compression algorithm for human information transfer.","Information formalises what language does intuitively."],
+  ["information","network","Networks exist to route information — topology determines what flows.","Information defines what networks are for."],
+  ["memory","identity","We are, in large part, the story our memory tells about us.","Identity is memory given narrative coherence over time."],
+  ["memory","grief","Grief is love continuing through memory after the person is gone.","Memory is both the source and the salve of grief."],
+  ["memory","history","History is collective memory with footnotes.","Memory extended across a community becomes history."],
+  ["memory","sleep","Sleep consolidates memory — the night shift of cognition.","Memory is processed and filed during sleep."],
+  ["love","biology","Love is an evolved attachment mechanism with measurable neurochemistry.","Biology explains the mechanisms; it cannot explain the feeling."],
+  ["love","gravity","Both are forces of mutual attraction that curve the space around them.","Gravity at cosmic scale mirrors love at human scale — pull without touching."],
+  ["love","grief","Grief is the shadow love casts — the price of attachment.","Love's depth is measured by the grief it leaves behind."],
+  ["love","trust","Love is trust taken to its deepest form — vulnerability made permanent.","Trust is the infrastructure love requires to survive."],
+  ["love","religion","Every major religion places love at its ethical and metaphysical centre.","Religion makes love into a cosmic principle."],
+  ["trust","money","Money is institutionalised trust — currency works only while the fiction holds.","Trust is the invisible substrate money is printed on."],
+  ["trust","democracy","Democracy requires that citizens trust institutions and each other enough to accept outcomes.","Trust is democracy's load-bearing infrastructure."],
+  ["trust","network","Networks function only when nodes can trust the links between them.","Trust is network theory applied to human relationships."],
+  ["trust","trade","Trade is trust made into transaction — both parties bet on each other.","Trust enables trade at every scale from barter to global finance."],
+  ["power","law","Law is codified power — the rules powerful actors wrote and enforce.","Power needs law to persist across time."],
+  ["power","war","War is power unmediated by negotiation.","Power asserted without constraint becomes war."],
+  ["power","maps","Whoever draws the map controls the territory — cartography is power.","Maps are power made legible."],
+  ["power","money","Money is portable, storable power — wealth is frozen influence.","Power concentrated becomes money; money spent becomes power."],
+  ["evolution","genetics","Genetics is the mechanism that makes evolution possible.","Evolution is what genetics produces over time."],
+  ["evolution","complexity","Evolution is the engine that generates biological complexity from simple rules.","Complexity in nature is almost always evolution's product."],
+  ["evolution","ecology","Ecology is the arena in which evolution plays out.","Evolution shaped every ecological relationship."],
+  ["evolution","games","Evolution is a game with no designer — fitness is the score.","Games model evolutionary dynamics with mathematical precision."],
+  ["network","ecology","Ecosystems are networks — food webs, symbiosis, competition at every node.","Network science explains ecosystem stability and collapse."],
+  ["network","internet","The internet is the network made global and digital.","Network topology defines the internet's resilience and vulnerabilities."],
+  ["network","bacteria","Bacterial colonies are chemical networks — quorum sensing is network signalling.","Networks in biology predate the internet by 3.5 billion years."],
+  ["network","complexity","Complex behaviour emerges at the network level from simple node rules.","Complexity theory models how networks generate emergent order."],
+  ["complexity","entropy","Complexity and entropy seem opposed — one builds, one dissolves. Both are thermodynamics.","Entropy is the tide complexity fights — and eventually loses."],
+  ["complexity","consciousness","Consciousness may be a complexity threshold — a phase transition in information processing.","Complexity theory offers one of the few tractable models of consciousness."],
+  ["symmetry","art","Artists exploit symmetry and its violation to create beauty and tension.","Art studies symmetry as the foundation of aesthetic pleasure."],
+  ["symmetry","physics","Conservation laws are the symmetries of physics — Noether's theorem unifies both.","Physics is the study of the symmetries nature refuses to break."],
+  ["entropy","information","Shannon's entropy and Boltzmann's entropy share the same equation — not by accident.","Information is defined as entropy in a probability space."],
+  ["entropy","time","Entropy increase is the thermodynamic arrow of time.","Time flows because entropy refuses to decrease."],
+  ["sleep","creativity","Sleep's REM phase generates novel connections between distant ideas.","Creativity depends on the memory consolidation and association that sleep enables."],
+  ["sleep","memory","Sleep is the night shift that files the day's experiences into long-term storage.","Memory consolidation is sleep's primary cognitive function."],
+  ["dreams","creativity","Dreams are the brain generating novel fictions without editorial restraint.","Creativity in waking life borrows the dream's unconstrained recombination."],
+  ["dreams","consciousness","Dreams show consciousness persists without sensory grounding.","Consciousness in dreams reveals how much of reality the brain constructs."],
+  ["grief","creativity","Many of history's greatest works were made in the aftermath of loss.","Creativity is one of the ways humans metabolise grief."],
+  ["grief","memory","Grief is love continuing through memory after the person is gone.","Memory is both the material and the wound of grief."],
+  ["play","games","Games are play with formalised rules and explicit stakes.","Play given structure becomes a game."],
+  ["play","creativity","Play is the mode in which creativity feels like fun rather than work.","Creativity expressed freely — without evaluation — is play."],
+  ["play","childhood","Childhood is the biological period allocated to learning through play.","Play is the operating system children use to model the world."],
+  ["games","chess","Chess is the Platonic ideal of the strategy game — perfect information, pure mind.","Chess exemplifies the formal elegance games can achieve."],
+  ["games","economics","Game theory bridges games and economics — strategic interaction in both.","Economics is the game played with real stakes."],
+  ["chess","war","Chess was designed as a war simulation — armies, strategy, sacrifice, territory.","War involves the same long-horizon strategy and sacrifice as chess."],
+  ["chess","politics","Politics is chess with people instead of pieces — strategy, sacrifice, position.","Chess models political competition at its most abstract."],
+  ["war","history","War is the event history organises itself around — most periods are defined by their conflicts.","History is partly the record of who won and why."],
+  ["war","politics","War is the continuation of politics by other means.","Politics is the attempt to make war unnecessary."],
+  ["war","evolution","War applies evolutionary pressure to societies — adaptation or extinction.","Evolution shaped human capacity for both war and cooperation."],
+  ["democracy","trust","Democracy is a system that institutionalises and manages political distrust.","Trust enables democratic norms to survive competitive elections."],
+  ["democracy","language","Democracy depends on deliberation — it requires a shared language of argument.","Language is the medium democracy deliberates in."],
+  ["fire","chemistry","Fire is the human discovery that chemistry can be harnessed.","Chemistry explains every aspect of combustion and heat."],
+  ["fire","language","Fire created the conditions for spoken language — campfire evenings, shared time.","Language spread around fires for hundreds of thousands of years."],
+  ["fire","culture","Fire enabled cooking, warmth, and social gathering — civilisation's first infrastructure.","Culture began around fire."],
+  ["fire","cooking","Cooking is fire applied to food — the first chemical technology.","Fire is cooking's essential tool and origin."],
+  ["bread","chemistry","Fermentation and the Maillard reaction are chemistry at kitchen scale.","Chemistry explains why bread rises, browns, and nourishes."],
+  ["bread","culture","Bread is the world's most widely shared food — a cultural universal.","Culture has shaped bread into thousands of distinct regional forms."],
+  ["bread","economics","Grain surpluses from farming enabled the first economies and cities.","Economics traces its origins to the agricultural surplus bread represents."],
+  ["cooking","chemistry","Cooking is applied chemistry — heat, acid, and enzymes transforming molecular structure.","Chemistry explains every transformation in the kitchen."],
+  ["cooking","culture","Every culture expresses its identity through what and how it cooks.","Culture is stored and transmitted partly through culinary practice."],
+  ["cooking","creativity","Cooking is creativity with edible medium — constraint, experimentation, and taste.","Creativity in cooking is bounded by nutrition and technique."],
+  ["meditation","neuroscience","Long-term meditation measurably changes cortical thickness and neural circuitry.","Neuroscience validates and explains the changes meditation practitioners report."],
+  ["meditation","consciousness","Meditation is the direct investigation of consciousness from within.","Consciousness studied from the inside — without instruments — becomes meditation."],
+  ["meditation","running","Both are rhythmic practices that converge on present-moment absorption.","Running and meditation both achieve stillness through motion and repetition."],
+  ["running","biology","Running shaped human anatomy — persistence hunting drove bipedalism's evolution.","Biology is the substrate that makes running possible and pleasurable."],
+  ["running","meditation","The runner's high and meditative absorption share neural and phenomenological overlap.","Meditation achieved through motion rather than stillness."],
+  ["maps","power","Whoever draws the map controls how territory is perceived and claimed.","Power made visible and legible becomes a map."],
+  ["maps","history","Maps are history's primary propaganda tool — projections encode worldview.","History is partly the story of which maps were believed."],
+  ["shadow","art","Shadow in visual art creates depth, tension, and psychological space.","Art uses shadow to give form to the invisible."],
+  ["shadow","identity","The Jungian shadow is the repressed self — identity defined by what it excludes.","Identity is partly the story we tell to disown our shadow."],
+  ["shadow","philosophy","Plato's cave is philosophy told through shadows — appearance vs reality.","Philosophy has used shadow as metaphor for illusion since Plato."],
+  ["religion","ritual","Ritual is religion made into repeated physical act — the body anchoring belief.","Religion crystallises into ritual — practice outlasting doctrine."],
+  ["religion","music","Sacred music is religion's most powerful emotional technology.","Music carries religious meaning across language barriers."],
+  ["religion","death","Religion's primary function may be to make death bearable.","Death generates the questions religion exists to answer."],
+  ["money","trust","Currency is a trust technology — notes are worthless until everyone agrees they are not.","Trust scaled to entire economies becomes money."],
+  ["money","power","Money is stored power — the capacity to direct other people's time and attention.","Power that can be accumulated and transferred becomes money."],
+  ["dna","information","DNA is the original information storage medium — 3.5 billion years of R&D.","Information stored in DNA is read, copied, and executed by cells."],
+  ["dna","evolution","DNA is the substrate evolution writes on — variation comes from copying errors.","Evolution is DNA rewriting itself across generations."],
+  ["genetics","evolution","Genetics supplies the variation mechanism; evolution is the selection that follows.","Evolution is what genetics generates over time under selection pressure."],
+  ["ocean","ecology","The ocean is Earth's largest and least understood ecosystem.","Ecology in the ocean operates at planetary scale."],
+  ["ocean","space","Both are vast, barely explored, and hostile to human life.","Space is the ocean of the cosmos — depth replaced by distance."],
+  ["ocean","life","All life began in the ocean — the sea is life's origin and archive.","Life's first chemistry happened in the ocean."],
+  ["space","astronomy","Astronomy is the science of space observed from inside it.","Space is astronomy's object and its laboratory."],
+  ["space","physics","Space is where physics operates at its most extreme and testable.","Physics explains the structure and dynamics of space."],
+  ["light","perception","Perception is mostly the brain's model of what light hitting the retina implies.","Light is the primary input to human perceptual systems."],
+  ["light","physics","Light is the central protagonist of modern physics — quantum and relativistic.","Physics is partly the 400-year project to understand what light is."],
+  ["light","art","Art is the practice of directing light to produce meaning and beauty.","Light in art shapes mood, form, depth, and symbolism."],
+  ["perception","psychology","Psychology is the science of perception extended to thought and behaviour.","Perception is psychology's first and most fundamental subject."],
+  ["perception","consciousness","Perception is the content of consciousness — what experience is made of.","Consciousness is perception from the inside."],
+  ["identity","memory","We are, in large part, the story memory tells about who we have been.","Memory is the raw material identity is built from."],
+  ["identity","language","We think about identity in and through language — selfhood is partly narrated.","Language shapes and constrains what identities are available."],
+  ["identity","culture","Culture provides the templates from which individuals construct identity.","Identity is culture personalised and inhabited."],
+  ["culture","religion","Religion is the primary vehicle through which culture transmits its deepest values.","Culture and religion co-evolved — each shapes the other."],
+  ["culture","language","Language is culture's primary carrier — vocabulary encodes worldview.","Culture is stored and transmitted mainly through language."],
+  ["culture","history","Culture is the living part of history — the past that is still active.","History is culture extended backward in time."],
+  ["anthropology","culture","Anthropology is the systematic study of how culture varies across human groups.","Culture is anthropology's primary object."],
+  ["anthropology","evolution","Anthropology is evolution applied to culture — variation, transmission, selection.","Evolution shaped the biological and social capacities anthropology studies."],
+  ["law","politics","Law is the institutionalisation of political power — rules written by winners.","Politics is the contest that determines what law will say."],
+  ["law","economics","Contract law and property rights are the infrastructure of market economies.","Economics depends on the legal framework that enforces agreements."],
+  ["engineering","physics","Engineering is physics made purposeful — the same equations, different goals.","Physics is the science engineering applies."],
+  ["engineering","mathematics","Engineering uses mathematics as its primary design tool.","Mathematics developed many tools in response to engineering needs."],
+  ["engineering","architecture","Architecture is engineering with aesthetic intention and cultural meaning.","Engineering is architecture stripped of everything except function."],
+  ["architecture","art","Architecture is the art form you inhabit — unavoidable, ambient, spatial.","Art given structural necessity and permanence becomes architecture."],
+  ["architecture","culture","Buildings are culture made permanent — cities are culture's accumulated decisions.","Culture is stored in architecture longer than in any other form."],
+  ["architecture","music","Both organise time and space into emotional experience through formal structure.","Music is architecture for the ear."],
+  ["literature","history","Literature preserves the emotional texture of historical moments that archives cannot.","History without literature is data without felt experience."],
+  ["literature","psychology","Literature is applied psychology — it builds working models of other minds.","Psychology finds in literature its richest database of human motivation."],
+  ["literature","language","Literature is language at maximum compression and intention.","Language finding its highest use becomes literature."],
+  ["film","literature","Film is literature extended into time, image, and sound.","Literature informs film's narrative structure and character depth."],
+  ["film","psychology","Film exploits psychological mechanisms — identification, emotion, suspension of disbelief.","Psychology explains why film moves us as powerfully as lived experience."],
+  ["poetry","language","Poetry is language under maximum formal and semantic pressure.","Language pushed to its limits becomes poetry."],
+  ["poetry","music","Poetry and music share metre, rhythm, and the use of sound as meaning.","Music is poetry freed from semantic constraint."],
+  ["jazz","creativity","Jazz is real-time creativity — improvisation as live composition.","Creativity in music achieves its purest form in jazz."],
+  ["jazz","mathematics","Improvisation follows implicit rules of scale, harmony, and rhythm — applied mathematics.","Mathematics underlies the harmonic structure jazz navigates spontaneously."],
+  ["dance","music","Dance is the body responding to music's structural invitation.","Music given physical form becomes dance."],
+  ["dance","culture","Every culture dances — and no two cultures dance the same way.","Culture expresses its deepest values through how it moves together."],
+  ["childhood","play","Childhood is the biological period dedicated to learning through play.","Play is the operating system children use to model the world."],
+  ["childhood","psychology","Childhood is where psychology's most consequential patterns are set.","Psychology returns again and again to childhood as cause and context."],
+  ["childhood","memory","Childhood memories are the foundation of adult identity — and among the least reliable.","Memory of childhood is partly constructed in retrospect."],
 ];
 
-const historyStore = [];
+// ═══════════════════════════════════════════════
+// BUILD ADJACENCY MAP
+// ═══════════════════════════════════════════════
+const ADJ = {};
+const EDGE_REASONS = {};
+
+function edgeKey(a, b) { return [a,b].sort().join('|||'); }
+
+EDGES.forEach(([a, b, reasonAB, reasonBA]) => {
+  if (!ADJ[a]) ADJ[a] = [];
+  if (!ADJ[b]) ADJ[b] = [];
+  ADJ[a].push(b);
+  ADJ[b].push(a);
+  const k = edgeKey(a, b);
+  EDGE_REASONS[k] = { [a]: reasonAB || '', [b]: reasonBA || '' };
+});
+
+// ═══════════════════════════════════════════════
+// FUZZY MATCH
+// ═══════════════════════════════════════════════
+function normalize(s) { return s.toLowerCase().replace(/[^a-z0-9]/g,'').trim(); }
+
+function fuzzyMatch(input) {
+  const n = normalize(input);
+  // 1. Exact id match
+  if (NODES[n]) return n;
+  // 2. Label match
+  for (const [id, node] of Object.entries(NODES)) {
+    if (normalize(node.label) === n) return id;
+  }
+  // 3. Partial/contains
+  let best = null, bestScore = 0;
+  for (const [id, node] of Object.entries(NODES)) {
+    const nid = normalize(id);
+    const nlabel = normalize(node.label);
+    if (nid.includes(n) || n.includes(nid)) { const s = Math.min(n.length, nid.length)/Math.max(n.length, nid.length); if(s > bestScore){bestScore=s;best=id;} }
+    if (nlabel.includes(n) || n.includes(nlabel)) { const s = Math.min(n.length, nlabel.length)/Math.max(n.length, nlabel.length); if(s > bestScore){bestScore=s;best=id;} }
+  }
+  if (best && bestScore > 0.4) return best;
+  // 4. Tag match
+  for (const [id, node] of Object.entries(NODES)) {
+    if (node.tags && node.tags.some(t => normalize(t) === n)) return id;
+  }
+  // 5. Bigram similarity
+  function bigrams(s) { const b=new Set(); for(let i=0;i<s.length-1;i++) b.add(s.slice(i,i+2)); return b; }
+  const nb = bigrams(n);
+  let bBest = null, bScore = 0;
+  for (const [id, node] of Object.entries(NODES)) {
+    const tb = bigrams(normalize(node.label));
+    const inter = [...nb].filter(x => tb.has(x)).length;
+    const score = inter / (nb.size + tb.size - inter + 0.001);
+    if (score > bScore) { bScore = score; bBest = id; }
+  }
+  if (bBest && bScore > 0.25) return bBest;
+  return null;
+}
+
+// ═══════════════════════════════════════════════
+// BIDIRECTIONAL BFS PATHFINDING
+// ═══════════════════════════════════════════════
+function biBFS(startId, endId, maxDepth) {
+  if (startId === endId) return [startId];
+
+  const fwd = new Map([[startId, [startId]]]);
+  const bwd = new Map([[endId, [endId]]]);
+  const fVisited = new Set([startId]);
+  const bVisited = new Set([endId]);
+  const fQueue = [startId];
+  const bQueue = [endId];
+
+  for (let depth = 0; depth < maxDepth; depth++) {
+    // Expand smaller frontier
+    const expandFwd = fQueue.length <= bQueue.length;
+    const queue = expandFwd ? fQueue : bQueue;
+    const visited = expandFwd ? fVisited : bVisited;
+    const pathMap = expandFwd ? fwd : bwd;
+    const otherPathMap = expandFwd ? bwd : fwd;
+    const otherVisited = expandFwd ? bVisited : fVisited;
+
+    const nextQueue = [];
+    const levelNodes = [...queue];
+    queue.length = 0;
+
+    for (const node of levelNodes) {
+      for (const neighbor of (ADJ[node] || [])) {
+        if (!visited.has(neighbor)) {
+          visited.add(neighbor);
+          const path = [...pathMap.get(node), neighbor];
+          pathMap.set(neighbor, path);
+          nextQueue.push(neighbor);
+
+          if (otherVisited.has(neighbor)) {
+            const otherPath = otherPathMap.get(neighbor);
+            if (expandFwd) {
+              return [...path, ...otherPath.slice(1).reverse()];
+            } else {
+              return [...otherPath, ...path.slice(1).reverse()];
+            }
+          }
+        }
+      }
+    }
+    queue.push(...nextQueue);
+    if (!queue.length) break;
+  }
+
+  // No path found — build indirect path via shared-tag hops
+  return buildIndirectPath(startId, endId, maxDepth);
+}
+
+function buildIndirectPath(startId, endId, maxDepth) {
+  // Find nodes sharing tags with both endpoints
+  const startTags = new Set(NODES[startId]?.tags || []);
+  const endTags = new Set(NODES[endId]?.tags || []);
+
+  const scored = Object.entries(NODES)
+    .filter(([id]) => id !== startId && id !== endId)
+    .map(([id, node]) => {
+      const t = new Set(node.tags || []);
+      const s = [...t].filter(x => startTags.has(x)).length + [...t].filter(x => endTags.has(x)).length;
+      return { id, score: s };
+    })
+    .sort((a,b) => b.score - a.score);
+
+  const bridges = scored.slice(0, maxDepth - 2).map(s => s.id);
+  const path = [startId, ...bridges.slice(0, Math.min(bridges.length, maxDepth - 2)), endId];
+
+  // Try to find BFS sub-paths between each hop
+  const result = [startId];
+  for (let i = 0; i < path.length - 1; i++) {
+    const sub = simpleBFS(path[i], path[i+1], 3);
+    if (sub && sub.length > 1) result.push(...sub.slice(1));
+    else result.push(path[i+1]);
+  }
+  // Deduplicate
+  return [...new Set(result)];
+}
+
+function simpleBFS(startId, endId, maxDepth) {
+  if (startId === endId) return [startId];
+  const visited = new Set([startId]);
+  const queue = [[startId, [startId]]];
+  while (queue.length) {
+    const [node, path] = queue.shift();
+    if (path.length > maxDepth + 1) break;
+    for (const n of (ADJ[node] || [])) {
+      if (!visited.has(n)) {
+        const np = [...path, n];
+        if (n === endId) return np;
+        visited.add(n);
+        queue.push([n, np]);
+      }
+    }
+  }
+  return null;
+}
+
+// ═══════════════════════════════════════════════
+// TRIM PATH TO DEPTH
+// ═══════════════════════════════════════════════
+function trimToDepth(path, maxSteps) {
+  if (path.length <= maxSteps + 1) return path;
+  // Keep start, end, and evenly-spaced intermediates
+  const result = [path[0]];
+  const middle = path.slice(1, -1);
+  const pick = maxSteps - 1;
+  const step = (middle.length - 1) / (pick - 1 + 0.001);
+  for (let i = 0; i < pick && i < middle.length; i++) {
+    result.push(middle[Math.round(i * step)]);
+  }
+  result.push(path[path.length - 1]);
+  return [...new Set(result)];
+}
+
+// ═══════════════════════════════════════════════
+// INSIGHT GENERATION
+// ═══════════════════════════════════════════════
+const INSIGHT_TEMPLATES = [
+  (a, b, mid) => `${a} and ${b} both reduce to ${mid} when you strip away the medium.`,
+  (a, b, mid) => `The path from ${a} to ${b} runs through ${mid} — the concept neither field admits it shares.`,
+  (a, b) => `What ${a} does with sound, ${b} does with symbols — same structure, different substrate.`,
+  (a, b, mid) => `${mid} is the ghost haunting both ${a} and ${b}.`,
+  (a, b) => `${a} is ${b} running at a different speed.`,
+  (a, b, mid) => `Strip ${a} to its skeleton and you find ${mid}. Strip ${b} and you find the same thing.`,
+  (a, b) => `Every practitioner of ${a} is secretly asking the questions ${b} was built to answer.`,
+  (a, b, mid) => `The bridge exists because ${mid} doesn't care which side of the wall it's on.`,
+];
+
+function generateInsight(path, startLabel, endLabel) {
+  const midIdx = Math.floor(path.length / 2);
+  const midLabel = NODES[path[midIdx]]?.label || path[midIdx];
+  const t = INSIGHT_TEMPLATES[Math.floor(Math.random() * INSIGHT_TEMPLATES.length)];
+  return t(startLabel, endLabel, midLabel);
+}
+
+// Related pairs: nodes connected to both endpoints
+function getRelatedPairs(startId, endId) {
+  const startNeighbors = new Set(ADJ[startId] || []);
+  const endNeighbors = new Set(ADJ[endId] || []);
+  const pairs = [];
+  // Pairs where both share a neighbor
+  for (const n of startNeighbors) {
+    for (const m of endNeighbors) {
+      if (n !== m && n !== endId && m !== startId && ADJ[n] && ADJ[n].includes(m)) {
+        pairs.push([NODES[n]?.label || n, NODES[m]?.label || m]);
+        if (pairs.length >= 3) return pairs;
+      }
+    }
+  }
+  // Fallback: random neighbor pairs
+  const sArr = [...startNeighbors].filter(x => x !== endId).slice(0, 3);
+  const eArr = [...endNeighbors].filter(x => x !== startId).slice(0, 3);
+  for (let i = 0; i < Math.min(sArr.length, eArr.length, 3); i++) {
+    pairs.push([NODES[sArr[i]]?.label || sArr[i], NODES[eArr[i]]?.label || eArr[i]]);
+  }
+  return pairs.slice(0, 3);
+}
+
+// Shared tags between two nodes
+function sharedTags(a, b) {
+  const ta = new Set(NODES[a]?.tags || []);
+  return (NODES[b]?.tags || []).filter(t => ta.has(t));
+}
+
+// ═══════════════════════════════════════════════
+// STATE & UI
+// ═══════════════════════════════════════════════
+let currentDepth = 5;
+let currentView = 'path';
+let currentResult = null;
+let historyStore = [];
+const DEPTH_HINTS = { 3:"Direct route", 5:"Balanced path", 7:"Scenic route", 9:"Deep exploration" };
+
+const PRESETS = [
+  ["Jazz","Quantum physics"],["Bread","Democracy"],["Sleep","Creativity"],
+  ["Fire","Language"],["Chess","Warfare"],["Grief","Mathematics"],
+  ["Ocean","Memory"],["Music","Architecture"],["Money","Trust"],
+  ["Bacteria","Internet"],["Running","Meditation"],["Maps","Power"],
+];
+
+const SURPRISES = [
+  ...PRESETS,
+  ["Gravity","Love"],["Dreams","Economics"],["Language","DNA"],
+  ["Shadows","Identity"],["Cooking","Chemistry"],["Childhood","War"],
+  ["Religion","Science"],["Light","Art"],["Dance","Politics"],
+  ["Entropy","Creativity"],["Consciousness","Economics"],["Film","Evolution"],
+];
+
+function init() {
+  const chips = document.getElementById('chips');
+  PRESETS.slice(0,8).forEach(([a,b]) => {
+    const c = document.createElement('button');
+    c.className = 'chip';
+    c.textContent = `${a} → ${b}`;
+    c.onclick = () => quickBuild(a, b);
+    chips.appendChild(c);
+  });
+
+  document.querySelectorAll('.depth-btn').forEach(btn => {
+    btn.onclick = () => setDepth(parseInt(btn.dataset.d));
+  });
+
+  ['start','end'].forEach(id => {
+    document.getElementById(id).addEventListener('keydown', e => {
+      if (e.key === 'Enter') buildBridge();
+    });
+  });
+
+  const p = new URLSearchParams(location.search);
+  if (p.get('from') && p.get('to')) {
+    setTimeout(() => quickBuild(p.get('from'), p.get('to')), 300);
+  }
+}
+
+function setDepth(d) {
+  currentDepth = d;
+  document.querySelectorAll('.depth-btn').forEach(b => b.classList.toggle('active', parseInt(b.dataset.d) === d));
+  document.getElementById('depth-hint').textContent = DEPTH_HINTS[d] || '';
+}
 
 function quickBuild(a, b) {
   document.getElementById('start').value = a;
@@ -438,165 +769,219 @@ function quickBuild(a, b) {
 }
 
 function surpriseMe() {
-  const used = new Set(historyStore.map(h => h[0] + h[1]));
-  const pool = SURPRISES.filter(p => !used.has(p[0] + p[1]));
+  const used = new Set(historyStore.map(([a,b]) => a+'|'+b));
+  const pool = SURPRISES.filter(([a,b]) => !used.has(a+'|'+b));
   const [a, b] = (pool.length ? pool : SURPRISES)[Math.floor(Math.random() * (pool.length || SURPRISES.length))];
-  document.getElementById('start').value = a;
-  document.getElementById('end').value = b;
-  buildBridge();
+  quickBuild(a, b);
 }
 
-async function buildBridge() {
-  const start = document.getElementById('start').value.trim();
-  const end = document.getElementById('end').value.trim();
-  if (!start || !end) return;
+function buildBridge() {
+  const rawStart = document.getElementById('start').value.trim();
+  const rawEnd = document.getElementById('end').value.trim();
+  if (!rawStart || !rawEnd) return;
 
-  const btn = document.getElementById('build-btn');
-  btn.disabled = true;
-  showLoading(start, end);
+  const out = document.getElementById('output');
+  out.innerHTML = `<div class="loading"><div class="dots"><span></span><span></span><span></span></div>Tracing path…</div>`;
+  document.getElementById('view-toggle').style.display = 'none';
 
-  try {
-    const data = await callClaude(start, end);
-    renderBridge(start, end, data);
-    addHistory(start, end);
-  } catch(e) {
-    showError(e.message || 'Something went wrong. Please try again.');
-  } finally {
-    btn.disabled = false;
-  }
-}
+  // Slight timeout so loading state renders
+  setTimeout(() => {
+    const startId = fuzzyMatch(rawStart);
+    const endId = fuzzyMatch(rawEnd);
 
-function showLoading(start, end) {
-  document.getElementById('output').innerHTML = `
-    <div class="status-line">
-      <div class="dot-pulse"><span></span><span></span><span></span></div>
-      Tracing path from <em>${esc(start)}</em> to <em>${esc(end)}</em>&hellip;
-    </div>`;
-}
-
-function showError(msg) {
-  document.getElementById('output').innerHTML = `
-    <div class="error-block">${esc(msg)}</div>`;
-}
-
-async function callClaude(start, end) {
-  const SYSTEM = `You are BridgeForge, an expert at finding intellectually surprising conceptual bridges between two ideas.
-
-Return ONLY valid JSON. No markdown, no code fences, no preamble. Schema:
-{
-  "steps": [
-    {
-      "concept": "string — the concept name (2-4 words max)",
-      "description": "string — one crisp sentence explaining the concept",
-      "logic": "string — one sentence explaining WHY this connects to the next step (omit on last step)"
+    if (!startId || !endId) {
+      const missing = !startId ? rawStart : rawEnd;
+      out.innerHTML = `<div class="no-path">
+        <strong>Unknown concept: "${missing}"</strong><br>
+        Try a different word, or pick from the suggestion chips below.
+        <div style="margin-top:12px;font-size:0.76rem;color:var(--fg3)">
+          Known concepts include: ${Object.values(NODES).map(n=>n.label).sort().join(', ')}
+        </div>
+      </div>`;
+      return;
     }
-  ],
-  "insight": "string — one punchy, memorable sentence that reframes the entire connection. No clichés.",
-  "furtherReading": ["string", ...],
-  "relatedPairs": [["A","B"], ["C","D"], ["E","F"]]
+
+    let rawPath = biBFS(startId, endId, currentDepth + 4);
+    const path = trimToDepth(rawPath, currentDepth);
+
+    currentResult = { startId, endId, path, rawStart, rawEnd };
+    renderPath(path, startId, endId);
+    addHistory(rawStart, rawEnd);
+
+    document.getElementById('view-toggle').style.display = 'flex';
+    showView(currentView);
+  }, 80);
 }
 
-Rules:
-- steps[0].concept = the FROM concept, steps[last].concept = the TO concept
-- 5-7 steps total. Each step must be non-obvious but logically sound
-- Prefer surprising intermediate concepts that most people wouldn't think of
-- insight must be concrete and specific, not vague ("X is just Y in disguise" patterns work well)
-- furtherReading: 3-4 actual book or paper titles (real ones) that illuminate the bridge
-- relatedPairs: 3 other concept pairs that share a similar structural bridge`;
-
-  const USER = `Build a bridge from "${start}" to "${end}".`;
-
-  const resp = await fetch('https://api.anthropic.com/v1/messages', {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({
-      model: 'claude-sonnet-4-20250514',
-      max_tokens: 1000,
-      system: SYSTEM,
-      messages: [{ role: 'user', content: USER }]
-    })
-  });
-
-  if (!resp.ok) {
-    const err = await resp.json().catch(() => ({}));
-    throw new Error(err?.error?.message || `API error ${resp.status}`);
-  }
-
-  const body = await resp.json();
-  const raw = body.content.find(b => b.type === 'text')?.text || '';
-
-  let clean = raw.trim();
-  if (clean.startsWith('```')) {
-    clean = clean.replace(/^```[^\n]*\n?/, '').replace(/```$/, '').trim();
-  }
-
-  return JSON.parse(clean);
+function showView(v) {
+  currentView = v;
+  document.getElementById('vt-path').classList.toggle('active', v === 'path');
+  document.getElementById('vt-graph').classList.toggle('active', v === 'graph');
+  if (!currentResult) return;
+  if (v === 'path') renderPath(currentResult.path, currentResult.startId, currentResult.endId);
+  else renderGraph(currentResult.path, currentResult.startId, currentResult.endId);
 }
 
-function renderBridge(start, end, data) {
-  const el = document.getElementById('output');
-  const stepCount = data.steps?.length || 0;
+function renderPath(path, startId, endId) {
+  const out = document.getElementById('output');
+  const startLabel = NODES[startId]?.label || startId;
+  const endLabel = NODES[endId]?.label || endId;
+  const insight = generateInsight(path, startLabel, endLabel);
+  const related = getRelatedPairs(startId, endId);
 
   let stepsHTML = '';
-  (data.steps || []).forEach((step, i) => {
-    const isFirst = i === 0;
-    const isLast = i === stepCount - 1;
-    const dotLabel = isFirst ? '○' : isLast ? '●' : (i + 1);
-    const delay = `animation-delay:${i * 0.07}s`;
+  path.forEach((nodeId, i) => {
+    const node = NODES[nodeId] || { label: nodeId, desc: '' };
+    const isFirst = i === 0, isLast = i === path.length - 1;
+    const nextId = path[i + 1];
+    const reason = nextId ? (EDGE_REASONS[edgeKey(nodeId, nextId)]?.[nodeId] || '') : '';
+    const shared = nextId ? sharedTags(nodeId, nextId) : [];
+    const dotClass = isFirst ? 'dot dot-s' : isLast ? 'dot dot-e' : 'dot';
+    const dotLabel = isFirst ? '○' : isLast ? '●' : i + 1;
+    const sharedHTML = shared.length ? `<span class="shared-tag">${shared[0]}</span>` : '';
     stepsHTML += `
-      <div class="step" style="${delay}">
-        <div class="step-dot">${dotLabel}</div>
+      <div class="step" style="animation-delay:${i*0.07}s">
+        <div class="${dotClass}">${dotLabel}</div>
         <div class="step-body">
-          <div class="step-concept">${esc(step.concept)}</div>
-          <div class="step-desc">${esc(step.description)}</div>
-          ${step.logic ? `<div class="step-logic">${esc(step.logic)}</div>` : ''}
+          <div class="concept">${node.label}${sharedHTML}</div>
+          <div class="desc">${node.desc}</div>
+          ${reason ? `<div class="why">${reason}</div>` : ''}
         </div>
       </div>`;
   });
 
-  let tagsHTML = '';
-  if (data.relatedPairs?.length) {
-    tagsHTML = data.relatedPairs.map(([a, b]) =>
-      `<button class="tag" onclick="quickBuild(${JSON.stringify(a)},${JSON.stringify(b)})">${esc(a)} → ${esc(b)}</button>`
-    ).join('');
-  }
+  const relatedHTML = related.length ? `
+    <div class="related">
+      <div class="mini-label">Related bridges</div>
+      <div class="tags">${related.map(([a,b]) => `<button class="tag" onclick="quickBuild(${JSON.stringify(a)},${JSON.stringify(b)})">${a} → ${b}</button>`).join('')}</div>
+    </div>` : '';
 
-  let readingHTML = '';
-  if (data.furtherReading?.length) {
-    readingHTML = data.furtherReading.map(t => `<li>${esc(t)}</li>`).join('');
-  }
-
-  const bridgeTitle = `${esc(start)} → ${esc(end)}`;
-
-  el.innerHTML = `
-    <div class="bridge-header">
-      <div class="bridge-title">${bridgeTitle}</div>
-      <div class="bridge-meta">${stepCount} steps</div>
+  out.innerHTML = `
+    <div class="bridge-hdr">
+      <div class="bridge-title">${startLabel} → ${endLabel}</div>
+      <div class="bridge-meta">
+        <span class="badge badge-blue">${path.length} steps</span>
+        <span class="badge badge-green">Depth ${currentDepth}</span>
+      </div>
     </div>
-
-    <div class="path-track">${stepsHTML}</div>
-
-    ${data.insight ? `
+    <div class="track">${stepsHTML}</div>
     <div class="insight">
-      <div class="insight-label">Bridge insight</div>
-      <div class="insight-text">${esc(data.insight)}</div>
-    </div>` : ''}
-
-    ${(tagsHTML || readingHTML) ? `
-    <div class="deepdive">
-      <div class="deepdive-label">Explore further</div>
-      ${tagsHTML ? `<div class="deepdive-tags">${tagsHTML}</div>` : ''}
-      ${readingHTML ? `<div class="deepdive-further"><strong style="font-weight:500;font-size:0.78rem;color:var(--fg2)">Reading: </strong>${data.furtherReading.join(' · ')}</div>` : ''}
-    </div>` : ''}
-
-    <div class="share-row">
-      <button class="btn btn-sm" id="share-btn" onclick="copyShare(${JSON.stringify(start)},${JSON.stringify(end)})">Copy link</button>
+      <div class="mini-label">Bridge insight</div>
+      <div class="insight-text">${insight}</div>
     </div>
-  `;
+    ${relatedHTML}
+    <div class="share-row">
+      <button class="btn btn-sm" id="share-btn" onclick="copyShare()">Copy link</button>
+    </div>`;
 }
 
-function copyShare(start, end) {
-  const url = `${location.origin}${location.pathname}?from=${encodeURIComponent(start)}&to=${encodeURIComponent(end)}`;
+// ═══════════════════════════════════════════════
+// D3 FORCE GRAPH
+// ═══════════════════════════════════════════════
+function renderGraph(path, startId, endId) {
+  const out = document.getElementById('output');
+  const startLabel = NODES[startId]?.label || startId;
+  const endLabel = NODES[endId]?.label || endId;
+
+  // Expand graph: path nodes + 1-hop neighbours (limited)
+  const pathSet = new Set(path);
+  const graphNodes = new Set(path);
+  path.forEach(id => {
+    (ADJ[id] || []).slice(0, 4).forEach(n => graphNodes.add(n));
+  });
+
+  const nodeArr = [...graphNodes].map(id => ({
+    id,
+    label: NODES[id]?.label || id,
+    onPath: pathSet.has(id),
+    isStart: id === startId,
+    isEnd: id === endId,
+  }));
+
+  const idSet = new Set(nodeArr.map(n => n.id));
+  const linkArr = [];
+  const seen = new Set();
+  nodeArr.forEach(n => {
+    (ADJ[n.id] || []).forEach(m => {
+      if (idSet.has(m)) {
+        const k = [n.id,m].sort().join('|');
+        if (!seen.has(k)) { seen.add(k); linkArr.push({ source: n.id, target: m, onPath: pathSet.has(n.id) && pathSet.has(m) }); }
+      }
+    });
+  });
+
+  out.innerHTML = `
+    <div class="bridge-hdr">
+      <div class="bridge-title">${startLabel} → ${endLabel}</div>
+      <div class="bridge-meta">
+        <span class="badge badge-blue">${path.length} steps</span>
+        <span class="badge badge-green">Depth ${currentDepth}</span>
+      </div>
+    </div>
+    <div id="graph-wrap">
+      <svg></svg>
+      <div class="graph-hint">Drag nodes · Scroll to zoom</div>
+    </div>`;
+
+  const wrap = document.getElementById('graph-wrap');
+  const W = wrap.clientWidth || 700, H = wrap.clientHeight || 500;
+  const svg = d3.select('#graph-wrap svg').attr('viewBox', `0 0 ${W} ${H}`);
+
+  const g = svg.append('g');
+
+  svg.call(d3.zoom().scaleExtent([0.3, 3]).on('zoom', e => g.attr('transform', e.transform)));
+
+  const sim = d3.forceSimulation(nodeArr)
+    .force('link', d3.forceLink(linkArr).id(d => d.id).distance(d => d.onPath ? 90 : 140).strength(d => d.onPath ? 0.9 : 0.3))
+    .force('charge', d3.forceManyBody().strength(-200))
+    .force('center', d3.forceCenter(W/2, H/2))
+    .force('collision', d3.forceCollide(36));
+
+  const link = g.append('g').selectAll('line').data(linkArr).join('line')
+    .attr('stroke', d => d.onPath ? '#1d4ed8' : '#e8e8e4')
+    .attr('stroke-width', d => d.onPath ? 2.5 : 1)
+    .attr('stroke-opacity', d => d.onPath ? 0.9 : 0.5);
+
+  const node = g.append('g').selectAll('g').data(nodeArr).join('g')
+    .attr('cursor', 'grab')
+    .call(d3.drag()
+      .on('start', (e, d) => { if (!e.active) sim.alphaTarget(0.3).restart(); d.fx=d.x; d.fy=d.y; })
+      .on('drag', (e, d) => { d.fx=e.x; d.fy=e.y; })
+      .on('end', (e, d) => { if (!e.active) sim.alphaTarget(0); d.fx=null; d.fy=null; }));
+
+  node.append('circle')
+    .attr('r', d => d.isStart || d.isEnd ? 22 : d.onPath ? 18 : 12)
+    .attr('fill', d => d.isStart ? '#0d0d0b' : d.isEnd ? '#1d4ed8' : d.onPath ? '#eff6ff' : '#ffffff')
+    .attr('stroke', d => d.isStart ? '#0d0d0b' : d.isEnd ? '#1d4ed8' : d.onPath ? '#bfdbfe' : '#e8e8e4')
+    .attr('stroke-width', d => d.onPath ? 1.5 : 1);
+
+  node.append('text')
+    .text(d => d.label)
+    .attr('text-anchor', 'middle')
+    .attr('dy', d => (d.isStart || d.isEnd ? 32 : 26))
+    .attr('class', 'node-label')
+    .attr('fill', d => d.isStart || d.isEnd ? '#0d0d0b' : d.onPath ? '#1d4ed8' : '#6b6b67')
+    .attr('font-weight', d => d.onPath ? '500' : '300');
+
+  // Labels on large circles
+  node.filter(d => d.isStart || d.isEnd || d.onPath).append('text')
+    .text(d => d.isStart ? '○' : d.isEnd ? '●' : '')
+    .attr('text-anchor', 'middle').attr('dy', '0.35em')
+    .attr('fill', d => d.isStart ? '#f8f8f6' : '#fff')
+    .attr('font-size', 14)
+    .attr('pointer-events', 'none');
+
+  sim.on('tick', () => {
+    link.attr('x1', d => d.source.x).attr('y1', d => d.source.y)
+        .attr('x2', d => d.target.x).attr('y2', d => d.target.y);
+    node.attr('transform', d => `translate(${d.x},${d.y})`);
+  });
+}
+
+function copyShare() {
+  const s = document.getElementById('start').value.trim();
+  const e = document.getElementById('end').value.trim();
+  const url = `${location.origin}${location.pathname}?from=${encodeURIComponent(s)}&to=${encodeURIComponent(e)}`;
   navigator.clipboard.writeText(url).then(() => {
     const btn = document.getElementById('share-btn');
     btn.textContent = 'Copied!';
@@ -604,46 +989,23 @@ function copyShare(start, end) {
   });
 }
 
-function addHistory(start, end) {
-  const exists = historyStore.find(h => h[0] === start && h[1] === end);
-  if (!exists) historyStore.unshift([start, end]);
-  if (historyStore.length > 5) historyStore.pop();
+function addHistory(a, b) {
+  historyStore = [[a,b], ...historyStore.filter(([x,y]) => !(x===a && y===b))].slice(0,5);
   renderHistory();
 }
 
 function renderHistory() {
   const el = document.getElementById('history');
-  if (!historyStore.length) { el.innerHTML = ''; return; }
-  el.innerHTML = `
-    <div class="history">
-      <div class="history-label">Previously explored</div>
-      <div class="history-list">
-        ${historyStore.map(([a, b]) =>
-          `<button class="chip" onclick="quickBuild(${JSON.stringify(a)},${JSON.stringify(b)})">${esc(a)} → ${esc(b)}</button>`
-        ).join('')}
-      </div>
-    </div>`;
+  if (!historyStore.length) { el.innerHTML=''; return; }
+  el.innerHTML = `<div class="history" style="margin-top:40px;padding-top:18px;border-top:1px solid var(--line)">
+    <div class="lbl" style="margin-bottom:10px">Previously explored</div>
+    <div class="history-chips">
+      ${historyStore.map(([a,b]) => `<button class="chip" onclick="quickBuild(${JSON.stringify(a)},${JSON.stringify(b)})">${a} → ${b}</button>`).join('')}
+    </div>
+  </div>`;
 }
 
-function esc(str) {
-  return String(str).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
-}
-
-// URL params on load
-window.addEventListener('load', () => {
-  const p = new URLSearchParams(location.search);
-  const from = p.get('from'), to = p.get('to');
-  if (from && to) {
-    document.getElementById('start').value = from;
-    document.getElementById('end').value = to;
-    buildBridge();
-  }
-});
-
-// Enter key
-document.addEventListener('keydown', e => {
-  if (e.key === 'Enter' && (e.target.id === 'start' || e.target.id === 'end')) buildBridge();
-});
+window.addEventListener('load', init);
 </script>
 </body>
 </html>
